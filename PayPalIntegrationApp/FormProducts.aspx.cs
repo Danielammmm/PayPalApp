@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Web.Services.Description;
-using PayPalIntegrationApp.Services;
-
+using PayPalIntegrationApp.Core.Services;
 
 namespace PayPalIntegrationApp
 {
@@ -11,7 +9,7 @@ namespace PayPalIntegrationApp
         {
             if (!IsPostBack)
             {
-                // Obtener el Access Token de la sesión o QueryString
+                // Obtener el Access Token desde la sesión o QueryString
                 string accessToken = Session["AccessToken"] as string ?? Request.QueryString["accessToken"];
 
                 if (string.IsNullOrEmpty(accessToken))
@@ -42,17 +40,15 @@ namespace PayPalIntegrationApp
                 // Obtener el Access Token desde la sesión
                 string accessToken = Session["AccessToken"].ToString();
 
-                // Crear instancia del servicio
-                var payPalService = new PayPalService();
+                // Crear instancia del nuevo servicio
+                var payPalProductService = new PayPalProductService();
 
-                // Crear producto
-                string productId = await payPalService.CreateProduct(accessToken, productName, productDescription, productType);
-
-                // Crear suscripción
-                string planId = await payPalService.CreatePlan(accessToken, productId, planName, planPrice, billingFrequency);
+                // Llamar al servicio para crear producto y plan
+                string planId = await payPalProductService.CreateProductAndPlan(
+                    accessToken, productName, productDescription, productType, planName, planPrice, billingFrequency);
 
                 // Mostrar resultados
-                lblResult.Text = $"Producto y Plan creados con éxito: Producto ID - {productId}, Plan ID - {planId}";
+                lblResult.Text = $"Producto y Plan creados con éxito. Plan ID: {planId}";
                 lblMessage.Text = string.Empty;
 
                 // Guardar el Plan ID en la sesión y mostrar el botón de pago
@@ -72,6 +68,5 @@ namespace PayPalIntegrationApp
             string planId = Session["PlanID"] as string;
             Response.Redirect($"FormPayment.aspx?planId={planId}");
         }
-
     }
 }

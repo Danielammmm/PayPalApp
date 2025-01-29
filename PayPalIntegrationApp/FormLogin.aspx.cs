@@ -4,11 +4,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using PayPalIntegrationApp.Services; // Ensure the namespace and class exist
-
-using System;
-using PayPalIntegrationApp.Services;
 using System.Web;
+using PayPalIntegrationApp.Core.Services;
 
 namespace PayPalIntegrationApp
 {
