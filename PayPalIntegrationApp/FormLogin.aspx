@@ -8,20 +8,27 @@
 </head>
 <body>
     <form id="form1" runat="server" class="form-container">
-        <h2>Integración con PayPal</h2>
+        <h2>Obtener Access Token - PayPal</h2>
         <asp:Label ID="lblMessage" runat="server" CssClass="error-message"></asp:Label>
+
         <div class="form-group">
             <label for="txtClientId">Client ID</label>
             <asp:TextBox ID="txtClientId" runat="server" CssClass="form-control"></asp:TextBox>
         </div>
+
         <div class="form-group">
             <label for="txtClientSecret">Client Secret</label>
             <asp:TextBox ID="txtClientSecret" runat="server" CssClass="form-control" TextMode="Password"></asp:TextBox>
         </div>
+
         <asp:Button ID="btnGetToken" runat="server" Text="Obtener Token" OnClick="btnGetToken_Click" CssClass="btn btn-primary" />
+
         <div class="result">
             <h3>Access Token:</h3>
             <asp:Label ID="lblToken" runat="server" CssClass="success-message"></asp:Label>
+            <br />
+            <!-- Botón para ir a productos -->
+            <asp:HyperLink ID="lnkGoToProducts" runat="server" CssClass="btn btn-link" Visible="false">Ir a Productos</asp:HyperLink>
         </div>
     </form>
 </body>

@@ -11,20 +11,19 @@ namespace PayPalIntegrationApp
         {
             if (!IsPostBack)
             {
-                string accessToken = Session["AccessToken"] as string;
-
-                // Depuración: Verificar si el token está disponible
-                System.Diagnostics.Debug.WriteLine("Access Token leído desde la sesión: " + accessToken);
+                // Obtener el Access Token de la sesión o QueryString
+                string accessToken = Session["AccessToken"] as string ?? Request.QueryString["accessToken"];
 
                 if (string.IsNullOrEmpty(accessToken))
                 {
-                    lblMessage.Text = "Access Token no encontrado. Por favor, inicia sesión primero.";
-                    btnCreateProductAndPlan.Enabled = false;
+                    // Redirigir al login si no hay token
+                    Response.Redirect("FormLogin.aspx");
                 }
                 else
                 {
-                    lblMessage.Text = string.Empty;
-                    btnCreateProductAndPlan.Enabled = true;
+                    // Guardar el token en la sesión si viene desde el QueryString
+                    Session["AccessToken"] = accessToken;
+                    lblMessage.Text = "Access Token válido. Puedes continuar.";
                 }
             }
         }
@@ -52,8 +51,13 @@ namespace PayPalIntegrationApp
                 // Crear suscripción
                 string planId = await payPalService.CreatePlan(accessToken, productId, planName, planPrice, billingFrequency);
 
+                // Mostrar resultados
                 lblResult.Text = $"Producto y Plan creados con éxito: Producto ID - {productId}, Plan ID - {planId}";
                 lblMessage.Text = string.Empty;
+
+                // Guardar el Plan ID en la sesión y mostrar el botón de pago
+                Session["PlanID"] = planId;
+                btnGoToPayment.Visible = true;
             }
             catch (Exception ex)
             {
@@ -61,5 +65,13 @@ namespace PayPalIntegrationApp
                 lblResult.Text = string.Empty;
             }
         }
+
+        protected void btnGoToPayment_Click(object sender, EventArgs e)
+        {
+            // Redirigir al formulario de pagos con el Plan ID
+            string planId = Session["PlanID"] as string;
+            Response.Redirect($"FormPayment.aspx?planId={planId}");
+        }
+
     }
 }

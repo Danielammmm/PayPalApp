@@ -11,7 +11,7 @@ namespace PayPalIntegrationApp
 {
 
 
-    public partial class FormLogin
+    public partial class FormPayment
     {
 
         /// <summary>
@@ -33,48 +33,30 @@ namespace PayPalIntegrationApp
         protected global::System.Web.UI.WebControls.Label lblMessage;
 
         /// <summary>
-        /// txtClientId control.
+        /// txtPlanId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtClientId;
+        protected global::System.Web.UI.WebControls.TextBox txtPlanId;
 
         /// <summary>
-        /// txtClientSecret control.
+        /// btnCreatePayment control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtClientSecret;
+        protected global::System.Web.UI.WebControls.Button btnCreatePayment;
 
         /// <summary>
-        /// btnGetToken control.
+        /// lnkPayment control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnGetToken;
-
-        /// <summary>
-        /// lblToken control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblToken;
-
-        /// <summary>
-        /// lnkGoToProducts control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkGoToProducts;
+        protected global::System.Web.UI.WebControls.HyperLink lnkPayment;
     }
 }

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using PayPalIntegrationApp.Services; // Ensure the namespace and class exist
 
+using System;
+using PayPalIntegrationApp.Services;
+using System.Web;
 
 namespace PayPalIntegrationApp
 {
@@ -26,22 +29,25 @@ namespace PayPalIntegrationApp
                     // Guardar el Access Token en la sesión
                     Session["AccessToken"] = accessToken;
 
-                    // Depuración: Verificar que se guarda en la sesión
-                    System.Diagnostics.Debug.WriteLine("Access Token guardado en la sesión: " + Session["AccessToken"]);
+                    // Mostrar el Access Token
+                    lblToken.Text = accessToken;
+                    lblMessage.Text = string.Empty;
 
-                    // Redirigir al formulario de productos
-                    Response.Redirect("FormProducts.aspx");
+                    // Hacer visible el botón de productos con el token en el QueryString
+                    lnkGoToProducts.NavigateUrl = $"FormProducts.aspx?accessToken={HttpUtility.UrlEncode(accessToken)}";
+                    lnkGoToProducts.Visible = true;
                 }
                 else
                 {
                     lblMessage.Text = "No se pudo obtener el Access Token.";
+                    lnkGoToProducts.Visible = false;
                 }
             }
             catch (Exception ex)
             {
                 lblMessage.Text = $"Error: {ex.Message}";
+                lnkGoToProducts.Visible = false;
             }
         }
-
     }
 }

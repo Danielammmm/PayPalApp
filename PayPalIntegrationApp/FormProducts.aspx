@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="FormProducts.aspx.cs" Inherits="PayPalIntegrationApp.FormProducts" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="FormProducts.aspx.cs" Inherits="PayPalIntegrationApp.FormProducts"Async="true" %>
 
 <!DOCTYPE html>
 <html>
@@ -53,6 +53,9 @@
         <div class="result">
             <h3>Resultado:</h3>
             <asp:Label ID="lblResult" runat="server" CssClass="success-message"></asp:Label>
+            <br />
+    <!-- Botón para ir a pagos -->
+    <asp:Button ID="btnGoToPayment" runat="server" Text="Ir a Pagos con el Plan" CssClass="btn btn-secondary" OnClick="btnGoToPayment_Click" Visible="false" />
         </div>
     </form>
 </body>

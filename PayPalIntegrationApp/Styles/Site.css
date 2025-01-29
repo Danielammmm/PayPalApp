@@ -70,3 +70,6 @@ label {
     font-size: 14px;
     text-align: center;
 }
+.error-message {
+    color: black;
+}
