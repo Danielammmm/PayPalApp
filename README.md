@@ -1,6 +1,4 @@
-# PayPalApp - Integración de Pagos y Suscripciones con PayPal
-
-![PayPal Integration](https://www.paypalobjects.com/webstatic/icon/pp258.png)
+# PayPalApp - Integración de Pagos y Suscripciones con PayPal <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" width="80" />
 
 ## 🚀 Descripción del Proyecto
 
