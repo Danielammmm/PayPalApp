@@ -16,6 +16,10 @@
         <asp:BulletedList ID="lstWebhookEvents" runat="server" CssClass="event-list"></asp:BulletedList>
 
         <asp:Button ID="btnProceed" runat="server" Text="Proceder al Pago" CssClass="btn btn-primary" OnClick="btnProceed_Click" Visible="false" />
+        <asp:Label ID="lblWebhookStatus" runat="server" Text="Verificando el estado del pago..."></asp:Label>
+        <br />
+        <asp:Button ID="btnRefresh" runat="server" Text="Actualizar Estado" OnClick="btnRefresh_Click" />
+
     </form>
 </body>
 </html>

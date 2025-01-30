@@ -10,20 +10,27 @@ namespace PayPalIntegrationApp
 {
     public partial class WebhookHandler : System.Web.UI.Page
     {
-        private readonly PayPalWebhookService _webhookService;
+        private readonly HttpClient _httpClient;
 
         public WebhookHandler()
         {
-            _webhookService = new PayPalWebhookService(new HttpClient());
+            _httpClient = new HttpClient();
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                lblWebhookStatus.Text = "Verificando el estado del pago...";
+            }
         }
         protected void btnProceed_Click(object sender, EventArgs e)
         {
-            // Lógica para proceder al pago
             string resourceId = Session["WebhookResourceID"] as string;
 
             if (!string.IsNullOrEmpty(resourceId))
             {
-                // Redirigir al formulario de pagos u otra acción
+                // Redirigir a la página de pagos con el Resource ID
                 Response.Redirect($"FormPayment.aspx?resourceId={resourceId}");
             }
             else
@@ -32,73 +39,44 @@ namespace PayPalIntegrationApp
             }
         }
 
-
-        protected async void Page_Load(object sender, EventArgs e)
+        protected async void btnRefresh_Click(object sender, EventArgs e)
         {
-            if (Request.HttpMethod == "POST")
+            string webhookId = Session["WebhookID"] as string;
+            if (string.IsNullOrEmpty(webhookId))
             {
-                try
+                lblWebhookStatus.Text = "⚠ No se encontró el Webhook ID.";
+                return;
+            }
+
+            string accessToken = Session["AccessToken"] as string;
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                lblWebhookStatus.Text = "⚠ Access Token no encontrado. Inicia sesión.";
+                return;
+            }
+
+            string webhookUrl = $"https://api.sandbox.paypal.com/v1/notifications/webhooks-events/{webhookId}";
+
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            HttpResponseMessage response = await _httpClient.GetAsync(webhookUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+
+                if (jsonResponse.Contains("\"status\": \"PENDING\""))
                 {
-                    string json;
-                    using (var reader = new StreamReader(Request.InputStream, Encoding.UTF8))
-                    {
-                        json = reader.ReadToEnd();
-                    }
-
-                    if (string.IsNullOrEmpty(json))
-                    {
-                        lblWebhookResult.Text = "⚠ No se recibió ningún evento válido.";
-                        Response.StatusCode = 400;
-                        return;
-                    }
-
-                    string accessToken = Session["AccessToken"] as string;
-                    string webhookId = Session["WebhookID"] as string;
-
-                    if (string.IsNullOrEmpty(accessToken))
-                    {
-                        lblWebhookResult.Text = "⚠ Access Token no encontrado. Inicia sesión primero.";
-                        Response.StatusCode = 401;
-                        return;
-                    }
-
-                    if (string.IsNullOrEmpty(webhookId))
-                    {
-                        lblWebhookResult.Text = "⚠ Webhook ID no encontrado. Configúralo primero.";
-                        Response.Redirect("FormWebhookID.aspx");
-                        return;
-                    }
-
-                    bool isValidEvent = await _webhookService.VerifyEvent(json, Request.Headers, accessToken, webhookId);
-
-                    if (isValidEvent)
-                    {
-                        string resultMessage = await _webhookService.ProcessWebhookEvent(json);
-                        lblWebhookResult.Text = resultMessage;
-                        btnProceed.Visible = true;
-                        Response.StatusCode = 200;
-                    }
-                    else
-                    {
-                        lblWebhookResult.Text = "⚠ Evento no válido. Firma no verificada.";
-                        Response.StatusCode = 400;
-                    }
+                    lblWebhookStatus.Text = "⚠ Pago aún en proceso... inténtalo de nuevo.";
                 }
-                catch (Exception ex)
+                else
                 {
-                    lblWebhookResult.Text = $"⚠ Error interno: {ex.Message}";
-                    Response.StatusCode = 500;
-                }
-                finally
-                {
-                    Context.ApplicationInstance.CompleteRequest();
+                    lblWebhookStatus.Text = "✅ Pago confirmado.";
+                    btnRefresh.Visible = false;
                 }
             }
             else
             {
-                lblWebhookResult.Text = "⚠ Solo se aceptan solicitudes POST.";
-                Response.StatusCode = 405;
-                Context.ApplicationInstance.CompleteRequest();
+                lblWebhookStatus.Text = "⚠ Error al consultar el estado del pago.";
             }
         }
     }
