@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35617.110 d17.13
+VisualStudioVersion = 17.13.35617.110
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayPalIntegrationApp", "PayPalIntegrationApp\PayPalIntegrationApp.csproj", "{B78A716C-7484-4CE4-843A-7C46DE38F242}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayPalIntegrationApp.Core", "PayPalIntegrationApp.Core\PayPalIntegrationApp.Core.csproj", "{7478B89E-1869-4088-96A9-1510E1D8835F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{B78A716C-7484-4CE4-843A-7C46DE38F242}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B78A716C-7484-4CE4-843A-7C46DE38F242}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B78A716C-7484-4CE4-843A-7C46DE38F242}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7478B89E-1869-4088-96A9-1510E1D8835F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7478B89E-1869-4088-96A9-1510E1D8835F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7478B89E-1869-4088-96A9-1510E1D8835F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7478B89E-1869-4088-96A9-1510E1D8835F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

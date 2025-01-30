@@ -44,7 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PayPalSubscriptionService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\PayPalProductService.cs" />
+    <Compile Include="Services\PayPalService .cs" />
+    <Compile Include="Services\PayPalWebhookService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

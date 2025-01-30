@@ -18,6 +18,13 @@ namespace PayPalIntegrationApp
         {
             if (!IsPostBack)
             {
+                // Validar que el Webhook ID esté almacenado
+                if (Session["WebhookID"] == null)
+                {
+                    Response.Redirect("FormWebhookID.aspx");
+                    return;
+                }
+
                 string accessToken = Session["AccessToken"] as string;
                 string planId = Request.QueryString["planId"] ?? Session["PlanID"] as string;
 
@@ -53,11 +60,9 @@ namespace PayPalIntegrationApp
 
             try
             {
-                // Llamar a la clase de servicio para crear la suscripción
                 var payPalSubscriptionService = new PayPalSubscriptionService();
                 string approvalUrl = await payPalSubscriptionService.CreateSubscription(planId, accessToken);
 
-                // Mostrar el enlace de pago
                 lnkPayment.NavigateUrl = approvalUrl;
                 lnkPayment.Visible = true;
                 lblMessage.Text = "Haz clic en el enlace para completar el pago.";

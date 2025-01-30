@@ -11,7 +11,7 @@ namespace PayPalIntegrationApp
 {
 
 
-    public partial class WebhookHandler
+    public partial class FormWebhookID
     {
 
         /// <summary>
@@ -24,30 +24,30 @@ namespace PayPalIntegrationApp
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
-        /// lblWebhookResult control.
+        /// lblMessage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblWebhookResult;
+        protected global::System.Web.UI.WebControls.Label lblMessage;
 
         /// <summary>
-        /// lstWebhookEvents control.
+        /// txtWebhookId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.BulletedList lstWebhookEvents;
+        protected global::System.Web.UI.WebControls.TextBox txtWebhookId;
 
         /// <summary>
-        /// btnProceed control.
+        /// btnSaveWebhookId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnProceed;
+        protected global::System.Web.UI.WebControls.Button btnSaveWebhookId;
     }
 }
