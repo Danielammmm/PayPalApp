@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Net.Mail;
+using Microsoft.AspNetCore.Http;
 
 namespace PayPalIntegrationApp.Core.Services
 {
@@ -84,5 +86,40 @@ namespace PayPalIntegrationApp.Core.Services
 
             return result.verification_status == "SUCCESS";
         }
+
+      /**  private async Task SendEmailNotification(string payerEmail, string transactionId)
+        {
+            try
+            {
+                string smtpUser = HttpContext.Current.Session["SmtpUser"] as string;
+                string smtpPassword = HttpContext.Current.Session["SmtpPassword"] as string;
+
+                if (string.IsNullOrEmpty(smtpUser) || string.IsNullOrEmpty(smtpPassword))
+                {
+                    throw new Exception("Las credenciales SMTP no están configuradas. Inicia sesión primero.");
+                }
+
+                MailMessage mail = new MailMessage();
+                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
+
+                mail.From = new MailAddress(smtpUser);
+                mail.To.Add(payerEmail);
+                mail.Subject = "Confirmación de Pago - PayPal";
+                mail.Body = $"Tu pago ha sido confirmado. ID de Transacción: {transactionId}";
+                mail.IsBodyHtml = true;
+
+                smtpClient.Port = 587;
+                smtpClient.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPassword);
+                smtpClient.EnableSsl = true;
+
+                await smtpClient.SendMailAsync(mail);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al enviar correo: " + ex.Message);
+            }
+        }*/
+
+
     }
 }
