@@ -24,31 +24,43 @@ namespace PayPalIntegrationApp.Core.Services
         /// </summary>
         public async Task<string> ProcessWebhookEvent(string json)
         {
-            try
+            return await Task.Run(() =>
             {
-                dynamic webhookEvent = JsonConvert.DeserializeObject(json);
-                string eventType = webhookEvent.event_type;
-                string resourceId = webhookEvent.resource.id; // Obtener ID generado
-
-                switch (eventType)
+                try
                 {
-                    case "BILLING.SUBSCRIPTION.ACTIVATED":
-                        return $"✅ Suscripción activada correctamente. ID: {resourceId}";
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        throw new ArgumentNullException(nameof(json), "El cuerpo del JSON está vacío.");
+                    }
 
-                    case "BILLING.SUBSCRIPTION.CANCELLED":
-                        return $"❌ Suscripción cancelada. ID: {resourceId}";
+                    WebhookEvent webhookEvent = JsonConvert.DeserializeObject<WebhookEvent>(json);
+                    string eventType = webhookEvent.event_type;
+                    string resourceId = webhookEvent.resource.id; // Obtener ID generado
 
-                    case "PAYMENT.SALE.COMPLETED":
-                        return $"💰 Pago completado correctamente. ID: {resourceId}";
+                    switch (eventType)
+                    {
+                        case "BILLING.SUBSCRIPTION.ACTIVATED":
+                            return $"✅ Suscripción activada correctamente. ID: {resourceId}";
 
-                    default:
-                        return $"ℹ Evento no manejado: {eventType} - ID: {resourceId}";
+                        case "BILLING.SUBSCRIPTION.CANCELLED":
+                            return $"❌ Suscripción cancelada. ID: {resourceId}";
+
+                        case "PAYMENT.SALE.COMPLETED":
+                            return $"💰 Pago completado correctamente. ID: {resourceId}";
+
+                        default:
+                            return $"ℹ Evento no manejado: {eventType} - ID: {resourceId}";
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                return $"⚠ Error interno al procesar el Webhook: {ex.Message}";
-            }
+                catch (JsonReaderException ex)
+                {
+                    return $"⚠ Error al analizar el JSON: {ex.Message}";
+                }
+                catch (Exception ex)
+                {
+                    return $"⚠ Error interno al procesar el Webhook: {ex.Message}";
+                }
+            });
         }
 
         /// <summary>
@@ -66,60 +78,47 @@ namespace PayPalIntegrationApp.Core.Services
                 throw new Exception("Webhook ID no encontrado. Asegúrate de configurarlo.");
             }
 
-            var verifyRequest = new
-            {
-                transmission_id = headers["paypal-transmission-id"],
-                transmission_time = headers["paypal-transmission-time"],
-                cert_url = headers["paypal-cert-url"],
-                auth_algo = headers["paypal-auth-algo"],
-                transmission_sig = headers["paypal-transmission-sig"],
-                webhook_id = webhookId, // ✅ Webhook ID obtenido dinámicamente
-                webhook_event = JsonConvert.DeserializeObject(json)
-            };
-
-            var content = new StringContent(JsonConvert.SerializeObject(verifyRequest), Encoding.UTF8, "application/json");
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await _client.PostAsync($"{baseUrl}/v1/notifications/verify-webhook-signature", content);
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-            dynamic result = JsonConvert.DeserializeObject(jsonResponse);
-
-            return result.verification_status == "SUCCESS";
-        }
-
-      /**  private async Task SendEmailNotification(string payerEmail, string transactionId)
-        {
             try
             {
-                string smtpUser = HttpContext.Current.Session["SmtpUser"] as string;
-                string smtpPassword = HttpContext.Current.Session["SmtpPassword"] as string;
-
-                if (string.IsNullOrEmpty(smtpUser) || string.IsNullOrEmpty(smtpPassword))
+                // Validar los encabezados
+                if (headers == null || headers.Count == 0)
                 {
-                    throw new Exception("Las credenciales SMTP no están configuradas. Inicia sesión primero.");
+                    throw new Exception("Encabezados HTTP no encontrados o están vacíos.");
                 }
 
-                MailMessage mail = new MailMessage();
-                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
+                var verifyRequest = new
+                {
+                    transmission_id = headers["paypal-transmission-id"],
+                    transmission_time = headers["paypal-transmission-time"],
+                    cert_url = headers["paypal-cert-url"],
+                    auth_algo = headers["paypal-auth-algo"],
+                    transmission_sig = headers["paypal-transmission-sig"],
+                    webhook_id = webhookId, // ✅ Webhook ID obtenido dinámicamente
+                    webhook_event = JsonConvert.DeserializeObject<WebhookEvent>(json)
+                };
 
-                mail.From = new MailAddress(smtpUser);
-                mail.To.Add(payerEmail);
-                mail.Subject = "Confirmación de Pago - PayPal";
-                mail.Body = $"Tu pago ha sido confirmado. ID de Transacción: {transactionId}";
-                mail.IsBodyHtml = true;
+                var content = new StringContent(JsonConvert.SerializeObject(verifyRequest), Encoding.UTF8, "application/json");
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                smtpClient.Port = 587;
-                smtpClient.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPassword);
-                smtpClient.EnableSsl = true;
+                var response = await _client.PostAsync($"{baseUrl}/v1/notifications/verify-webhook-signature", content);
+                var jsonResponse = await response.Content.ReadAsStringAsync();
 
-                await smtpClient.SendMailAsync(mail);
+                Console.WriteLine("Respuesta de verificación: " + jsonResponse);
+
+                dynamic result = JsonConvert.DeserializeObject(jsonResponse);
+
+                return result.verification_status == "SUCCESS";
+            }
+            catch (JsonReaderException ex)
+            {
+                Console.WriteLine("Error al analizar el JSON en VerifyEvent: " + ex.Message);
+                return false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error al enviar correo: " + ex.Message);
+                Console.WriteLine("Error interno en VerifyEvent: " + ex.Message);
+                return false;
             }
-        }*/
-
-
+        }
     }
 }

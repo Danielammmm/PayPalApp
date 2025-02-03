@@ -74,6 +74,7 @@
     <Compile Include="Services\PayPalProductService.cs" />
     <Compile Include="Services\PayPalService .cs" />
     <Compile Include="Services\PayPalWebhookService.cs" />
+    <Compile Include="Services\WebhookEventModels.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
