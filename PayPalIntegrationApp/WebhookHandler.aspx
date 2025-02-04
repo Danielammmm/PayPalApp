@@ -3,23 +3,21 @@
 <!DOCTYPE html>
 <html>
 <head runat="server">
-    <title>Webhook Handler</title>
+    <title>Confirmación de Pago</title>
     <link href="styles/site.css" rel="stylesheet" />
 </head>
 <body>
     <form id="form1" runat="server" class="form-container">
-        <h2>Eventos Recibidos del Webhook</h2>
-        
-        <asp:Label ID="lblWebhookResult" runat="server" CssClass="result-message"></asp:Label>
+        <h2>Estado del Pago</h2>
 
-        <h3>Eventos Recibidos:</h3>
-        <asp:BulletedList ID="lstWebhookEvents" runat="server" CssClass="event-list"></asp:BulletedList>
+        <!-- Mensaje de estado del pago -->
+        <asp:Label ID="lblWebhookStatus" runat="server" CssClass="result-message"></asp:Label>
 
-        <asp:Button ID="btnProceed" runat="server" Text="Proceder al Pago" CssClass="btn btn-primary" OnClick="btnProceed_Click" Visible="false" />
-        <asp:Label ID="lblWebhookStatus" runat="server" Text="Verificando el estado del pago..."></asp:Label>
-        <br />
-        <asp:Button ID="btnRefresh" runat="server" Text="Actualizar Estado" OnClick="btnRefresh_Click" />
+        <!-- Botón para actualizar el estado del pago -->
+        <asp:Button ID="btnRefresh" runat="server" Text="Actualizar Estado" CssClass="btn" OnClick="btnRefresh_Click" />
 
+        <!-- Mensaje de carga -->
+        <asp:Label ID="lblLoading" runat="server" CssClass="loading-message" Visible="false"></asp:Label>
     </form>
 </body>
 </html>

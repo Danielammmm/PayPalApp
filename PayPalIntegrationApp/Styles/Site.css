@@ -73,3 +73,19 @@ label {
 .error-message {
     color: black;
 }
+.loading-message {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: #007bff;
+    font-size: 14px;
+}
+
+.result-message {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    word-break: break-all;
+    color: #333;
+}

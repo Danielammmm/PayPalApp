@@ -2,125 +2,170 @@
 using System.IO;
 using System.Text;
 using System.Web.UI;
+using PayPalIntegrationApp.Core.Services;
 using System.Threading.Tasks;
 using System.Net.Http;
-using Newtonsoft.Json;
-using PayPalIntegrationApp.Core.Services;
-using System.Data.SqlClient;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace PayPalIntegrationApp
 {
-    public partial class WebhookHandler : Page
+    public partial class WebhookHandler : System.Web.UI.Page
     {
         private readonly PayPalWebhookService _webhookService;
-        private string connectionString = "Data Source=DESKTOP-LIO9C0K\\SQLEXPRESS;Initial Catalog=PayPalWebhooksDB;Integrated Security=True;\r\n";
 
         public WebhookHandler()
         {
             _webhookService = new PayPalWebhookService(new HttpClient());
         }
 
-        protected void Page_Load(object sender, EventArgs e)
+        protected async void Page_Load(object sender, EventArgs e)
         {
             if (Request.HttpMethod == "POST")
             {
-                HandleWebhookAsync().GetAwaiter().GetResult();
-                return;
+                await ProcesarWebhook();
+            }
+            else if (!IsPostBack)
+            {
+                lblWebhookStatus.Text = "Esperando confirmación de pago...";
             }
         }
 
-        private async Task HandleWebhookAsync()
+        private async Task ProcesarWebhook()
         {
             try
             {
-                string jsonPayload;
-                using (StreamReader reader = new StreamReader(Request.InputStream, Encoding.UTF8))
+                string json;
+                using (var reader = new StreamReader(Request.InputStream, Encoding.UTF8))
                 {
-                    jsonPayload = await reader.ReadToEndAsync().ConfigureAwait(false);
+                    json = await reader.ReadToEndAsync();
                 }
 
-                if (string.IsNullOrEmpty(jsonPayload))
+                if (string.IsNullOrEmpty(json))
                 {
                     Response.StatusCode = 400;
-                    Response.Write("No se recibió un cuerpo en la solicitud.");
-                    Response.Flush();
+                    Response.Write("⚠ No se recibió ningún evento válido.");
                     return;
                 }
 
                 string accessToken = Session["AccessToken"] as string;
                 string webhookId = Session["WebhookID"] as string;
 
-                if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(webhookId))
+                if (string.IsNullOrEmpty(accessToken))
                 {
                     Response.StatusCode = 401;
-                    Response.Write("Access Token o Webhook ID no disponible.");
-                    Response.Flush();
+                    Response.Write("⚠ Access Token no encontrado. Inicia sesión primero.");
                     return;
                 }
 
-                bool isValid = await _webhookService.VerifyEvent(jsonPayload, Request.Headers, accessToken, webhookId).ConfigureAwait(false);
-
-                if (!isValid)
+                if (string.IsNullOrEmpty(webhookId))
                 {
-                    Response.StatusCode = 403;
-                    Response.Write("La firma del webhook no es válida.");
-                    Response.Flush();
+                    Response.Redirect("FormWebhookID.aspx");
                     return;
                 }
 
-                Response.StatusCode = 200;
-                Response.Write("Webhook recibido.");
-                Response.Flush();
+                bool isValidEvent = await _webhookService.VerifyEvent(json, Request.Headers, accessToken, webhookId);
 
-                _ = ProcessWebhookAsync(jsonPayload);
+                if (isValidEvent)
+                {
+                    string resultMessage = await _webhookService.ProcessWebhookEvent(json);
+                    Session["WebhookResourceID"] = JObject.Parse(json)["resource"]?["id"]?.ToString();
+                    Response.StatusCode = 200;
+                    Response.Write(resultMessage);
+                }
+                else
+                {
+                    Response.StatusCode = 400;
+                }
             }
             catch (Exception ex)
             {
-                Response.StatusCode = 500;
-                Response.Write($"Error interno: {ex.Message}");
-                Response.Flush();
+                Response.StatusCode = 500;            }
+            finally
+            {
+                Context.ApplicationInstance.CompleteRequest();
             }
         }
 
-        private async Task ProcessWebhookAsync(string jsonPayload)
+        protected async void btnRefresh_Click(object sender, EventArgs e)
         {
+            string webhookEventId = Session["WebhookResourceID"] as string;
+
+            if (string.IsNullOrEmpty(webhookEventId))
+            {
+                lblWebhookStatus.Text = "⚠ No se encontró el Webhook Event ID. Intentando recuperar...";
+
+                try
+                {
+                    webhookEventId = await _webhookService.GetLatestWebhookId(Session["AccessToken"] as string);
+                }
+                catch (Exception ex)
+                {
+                    lblWebhookStatus.Text = $"⚠ Error al recuperar el Webhook ID: {ex.Message}";
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(webhookEventId))
+                {
+                    lblWebhookStatus.Text = "⚠ No se pudo recuperar un Webhook Event ID.";
+                    return;
+                }
+            }
+
+            string accessToken = Session["AccessToken"] as string;
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                lblWebhookStatus.Text = "⚠ Access Token no encontrado. Inicia sesión.";
+                return;
+            }
+
+            string webhookUrl = $"https://api.sandbox.paypal.com/v1/notifications/webhooks-events/{webhookEventId}";
             try
             {
-                WebhookEvent webhookEvent = JsonConvert.DeserializeObject<WebhookEvent>(jsonPayload);
-                string eventType = webhookEvent.event_type;
-                string resourceId = webhookEvent.resource.id;
-                string status = webhookEvent.resource.status;
-                string webhookId = webhookEvent.id;
-
-                await SaveWebhookToDatabase(webhookId, eventType, resourceId, status, jsonPayload);
-            }
-            catch (JsonReaderException ex)
-            {
-                Console.WriteLine($"Error JSON: {ex.Message}");
+                var result = await GetWebhookDetails(webhookUrl, accessToken);
+                lblWebhookStatus.Text = result;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al procesar el Webhook: {ex.Message}");
+                lblWebhookStatus.Text = $"⚠ Error: {ex.Message}";
             }
         }
 
-        private async Task SaveWebhookToDatabase(string webhookId, string eventType, string resourceId, string status, string jsonPayload)
+        private async Task<string> GetWebhookDetails(string webhookUrl, string accessToken)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (var client = new HttpClient())
             {
-                await conn.OpenAsync();
-                string query = "INSERT INTO WebhookLogs (WebhookId, EventType, ResourceId, Status, Payload, ReceivedAt) VALUES (@WebhookId, @EventType, @ResourceId, @Status, @Payload, GETDATE())";
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                HttpResponseMessage response = await client.GetAsync(webhookUrl);
+                if (!response.IsSuccessStatusCode)
                 {
-                    cmd.Parameters.AddWithValue("@WebhookId", webhookId);
-                    cmd.Parameters.AddWithValue("@EventType", eventType);
-                    cmd.Parameters.AddWithValue("@ResourceId", resourceId);
-                    cmd.Parameters.AddWithValue("@Status", status);
-                    cmd.Parameters.AddWithValue("@Payload", jsonPayload);
+                    throw new Exception($"Error al consultar el Webhook: {response.ReasonPhrase}");
+                }
 
-                    await cmd.ExecuteNonQueryAsync();
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                JObject webhookData = JObject.Parse(jsonResponse);
+
+                string eventType = webhookData["event_type"]?.ToString();
+                string eventStatus = webhookData["resource"]?["status"]?.ToString();
+
+                switch (eventType)
+                {
+                    case "BILLING.SUBSCRIPTION.ACTIVATED":
+                    case "PAYMENT.SALE.COMPLETED":
+                        if (eventStatus == "SUCCESS" || eventStatus == "ACTIVE")
+                        {
+                            return "✅ Pago realizado con éxito. Puedes consultar tu PayPal.";
+                        }
+                        else if (eventStatus == "APPROVAL_PENDING")
+                        {
+                            return "⚠ La suscripción aún está pendiente de aprobación.";
+                        }
+                        else
+                        {
+                            return $"⚠ Estado desconocido: {eventStatus}";
+                        }
+                    default:
+                        return "⚠ No se encontró un evento de pago completado o suscripción activada.";
                 }
             }
         }

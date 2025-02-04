@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Net.Mail;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
 
 namespace PayPalIntegrationApp.Core.Services
 {
@@ -20,47 +21,79 @@ namespace PayPalIntegrationApp.Core.Services
         }
 
         /// <summary>
+        /// Recupera el ID del último evento webhook relacionado con pagos o suscripciones.
+        /// </summary>
+        public async Task<string> GetLatestWebhookId(string accessToken)
+        {
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                throw new Exception("Access Token no encontrado.");
+            }
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            string webhookListUrl = $"{baseUrl}/v1/notifications/webhooks-events";
+
+            try
+            {
+                HttpResponseMessage response = await _client.GetAsync(webhookListUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    JObject webhookData = JObject.Parse(jsonResponse);
+
+                    JArray events = (JArray)webhookData["events"];
+                    foreach (var evt in events)
+                    {
+                        if (evt["event_type"]?.ToString() == "BILLING.SUBSCRIPTION.ACTIVATED" || evt["event_type"]?.ToString() == "PAYMENT.SALE.COMPLETED")
+                        {
+                            return evt["id"]?.ToString();
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Error al obtener los webhooks: {response.ReasonPhrase}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"⚠ Error al recuperar el Webhook ID: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Procesa el evento recibido del Webhook de PayPal.
         /// </summary>
         public async Task<string> ProcessWebhookEvent(string json)
         {
-            return await Task.Run(() =>
+            try
             {
-                try
+                dynamic webhookEvent = JsonConvert.DeserializeObject(json);
+                string eventType = webhookEvent.event_type;
+                string resourceId = webhookEvent.resource.id; // Obtener ID generado
+
+                switch (eventType)
                 {
-                    if (string.IsNullOrEmpty(json))
-                    {
-                        throw new ArgumentNullException(nameof(json), "El cuerpo del JSON está vacío.");
-                    }
+                    case "PAYMENT.CAPTURE.COMPLETED":
+                        return $"💰 Pago completado correctamente. ID: {resourceId}";
 
-                    WebhookEvent webhookEvent = JsonConvert.DeserializeObject<WebhookEvent>(json);
-                    string eventType = webhookEvent.event_type;
-                    string resourceId = webhookEvent.resource.id; // Obtener ID generado
+                    case "PAYMENT.CAPTURE.DENIED":
+                        return $"❌ Pago denegado. ID: {resourceId}";
 
-                    switch (eventType)
-                    {
-                        case "BILLING.SUBSCRIPTION.ACTIVATED":
-                            return $"✅ Suscripción activada correctamente. ID: {resourceId}";
+                    case "PAYMENT.CAPTURE.PENDING":
+                        return $"⏳ Pago pendiente. ID: {resourceId}";
 
-                        case "BILLING.SUBSCRIPTION.CANCELLED":
-                            return $"❌ Suscripción cancelada. ID: {resourceId}";
-
-                        case "PAYMENT.SALE.COMPLETED":
-                            return $"💰 Pago completado correctamente. ID: {resourceId}";
-
-                        default:
-                            return $"ℹ Evento no manejado: {eventType} - ID: {resourceId}";
-                    }
+                    default:
+                        return $"ℹ Evento no manejado: {eventType} - ID: {resourceId}";
                 }
-                catch (JsonReaderException ex)
-                {
-                    return $"⚠ Error al analizar el JSON: {ex.Message}";
-                }
-                catch (Exception ex)
-                {
-                    return $"⚠ Error interno al procesar el Webhook: {ex.Message}";
-                }
-            });
+            }
+            catch (Exception ex)
+            {
+                return $"⚠ Error interno al procesar el Webhook: {ex.Message}";
+            }
         }
 
         /// <summary>
@@ -78,47 +111,25 @@ namespace PayPalIntegrationApp.Core.Services
                 throw new Exception("Webhook ID no encontrado. Asegúrate de configurarlo.");
             }
 
-            try
+            var verifyRequest = new
             {
-                // Validar los encabezados
-                if (headers == null || headers.Count == 0)
-                {
-                    throw new Exception("Encabezados HTTP no encontrados o están vacíos.");
-                }
+                transmission_id = headers["paypal-transmission-id"],
+                transmission_time = headers["paypal-transmission-time"],
+                cert_url = headers["paypal-cert-url"],
+                auth_algo = headers["paypal-auth-algo"],
+                transmission_sig = headers["paypal-transmission-sig"],
+                webhook_id = webhookId,
+                webhook_event = JsonConvert.DeserializeObject(json)
+            };
 
-                var verifyRequest = new
-                {
-                    transmission_id = headers["paypal-transmission-id"],
-                    transmission_time = headers["paypal-transmission-time"],
-                    cert_url = headers["paypal-cert-url"],
-                    auth_algo = headers["paypal-auth-algo"],
-                    transmission_sig = headers["paypal-transmission-sig"],
-                    webhook_id = webhookId, // ✅ Webhook ID obtenido dinámicamente
-                    webhook_event = JsonConvert.DeserializeObject<WebhookEvent>(json)
-                };
+            var content = new StringContent(JsonConvert.SerializeObject(verifyRequest), Encoding.UTF8, "application/json");
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var content = new StringContent(JsonConvert.SerializeObject(verifyRequest), Encoding.UTF8, "application/json");
-                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var response = await _client.PostAsync($"{baseUrl}/v1/notifications/verify-webhook-signature", content);
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            dynamic result = JsonConvert.DeserializeObject(jsonResponse);
 
-                var response = await _client.PostAsync($"{baseUrl}/v1/notifications/verify-webhook-signature", content);
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine("Respuesta de verificación: " + jsonResponse);
-
-                dynamic result = JsonConvert.DeserializeObject(jsonResponse);
-
-                return result.verification_status == "SUCCESS";
-            }
-            catch (JsonReaderException ex)
-            {
-                Console.WriteLine("Error al analizar el JSON en VerifyEvent: " + ex.Message);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error interno en VerifyEvent: " + ex.Message);
-                return false;
-            }
+            return result.verification_status == "SUCCESS";
         }
     }
 }
