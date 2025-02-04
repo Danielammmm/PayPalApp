@@ -32,18 +32,13 @@ cd PayPalApp
 ```
 ### 2️⃣ **Configurar las Credenciales de PayPal**
 1. Crear una cuenta en PayPal Developer.
-2. Obtenr Client ID y Secret en el Dashboard de PayPal.
-3. Configurar web.config en la sección <appSettings>:
-   ```
-   <appSettings>
-    <add key="PayPalClientID" value="TU_CLIENT_ID_AQUI" />
-    <add key="PayPalClientSecret" value="TU_SECRET_AQUI" />
-    </appSettings>
-   ```
+2. Obtener Client ID y Secret en el Dashboard de PayPal.
+3. Configurar las credenciales en el sistema al momento del login.
+
 ### 3️⃣ **Ejecutar la Aplicación**
 1. Abrir el proyecto en Visual Studio.
 2. Seleccionar PayPalIntegrationApp como proyecto de inicio.
-3. Presionar F5 o ejecuta el servidor IIS Express.
+3. Presionar F5 o ejecutar el servidor IIS Express.
 
 ---
 ### 🔄 **Flujo del Sistema**
@@ -66,5 +61,27 @@ cd PayPalApp
 ```
 3. Copiar la URL pública (https://random-id.ngrok.io/WebhookHandler.aspx).
 4. Registrar el Webhook en PayPal en PayPal Developer Console.
+
+---
+
+## 📂 **Estructura del Proyecto**
+```
+📦 PayPalApp
+ ┣ 📂 PayPalIntegrationApp (Proyecto principal con vistas y backend)
+ ┃ ┣ 📂 styles (Contiene Site.css para los estilos)
+ ┃ ┣ FormLogin.aspx
+ ┃ ┃ FormPayment.aspx
+ ┃ ┃ FormProducts.aspx
+ ┃ ┃ FormWebhookID.aspx
+ ┃ ┃ WebhookHandler.aspx (Manejo de Webhooks)
+ ┃ ┗ Web.config (Configuraciones de la aplicación)
+ ┣ 📂 PayPalIntegrationApp.Core (Librería de clases)
+ ┃ ┣ 📂 Services (Servicios para la integración con PayPal)
+ ┃ ┃ ┣ PayPalProductService.cs
+ ┃ ┃ ┣ PayPalService.cs
+ ┃ ┃ ┗ PayPalWebhookService.cs
+ ┃ ┗ PayPalSubscriptionService.cs
+```
+
 ---
 
