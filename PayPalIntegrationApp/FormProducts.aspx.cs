@@ -43,9 +43,13 @@ namespace PayPalIntegrationApp
                 // Crear instancia del nuevo servicio
                 var payPalProductService = new PayPalProductService();
 
-                // Llamar al servicio para crear producto y plan
-                string planId = await payPalProductService.CreateProductAndPlan(
-                    accessToken, productName, productDescription, productType, planName, planPrice, billingFrequency);
+                // Llamar al servicio para crear producto
+                string productId = await payPalProductService.CreateProduct(
+                    accessToken, productName, productDescription, productType);
+
+                // Llamar al servicio para crear plan
+                string planId = await payPalProductService.CreatePlan(
+                    accessToken, productId, planName, planPrice, billingFrequency);
 
                 // Mostrar resultados
                 lblResult.Text = $"Producto y Plan creados con éxito. Plan ID: {planId}";

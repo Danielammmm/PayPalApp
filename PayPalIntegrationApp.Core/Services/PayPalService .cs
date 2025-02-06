@@ -127,6 +127,7 @@ namespace PayPalIntegrationApp.Core.Services
                     throw new Exception($"Error en la solicitud al obtener el token: {ex.Message}");
                 }
             }
+
         }
     }
 }

@@ -23,8 +23,8 @@ namespace PayPalIntegrationApp.Core.Services
                     application_context = new
                     {
                         brand_name = "Mi App de Suscripciones",
-                        return_url = "https://localhost:44358/WebhookHandler.aspx",
-                        cancel_url = "https://localhost:44358/FormProducts.aspx"
+                        return_url = "https://paypalintegrationapp20250206104741-a6d5axhde5cqbxbu.eastus-01.azurewebsites.net/WebhookHandler",
+                        cancel_url = "https://paypalintegrationapp20250206104741-a6d5axhde5cqbxbu.eastus-01.azurewebsites.net/FormProducts"
                     }
                 };
 
