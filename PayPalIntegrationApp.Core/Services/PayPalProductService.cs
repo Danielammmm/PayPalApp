@@ -54,15 +54,15 @@ namespace PayPalIntegrationApp.Core.Services
                     name = name,
                     billing_cycles = new[]
                     {
-                new
-                {
-                    frequency = new { interval_unit = frequency, interval_count = 1 },
-                    tenure_type = "REGULAR",
-                    sequence = 1,
-                    total_cycles = 0,
-                    pricing_scheme = new { fixed_price = new { value = price, currency_code = "USD" } }
-                }
-            },
+             new
+             {
+                 frequency = new { interval_unit = frequency, interval_count = 1 },
+                 tenure_type = "REGULAR",
+                 sequence = 1,
+                 total_cycles = 0,
+                 pricing_scheme = new { fixed_price = new { value = price, currency_code = "USD" } }
+             }
+         },
                     payment_preferences = new
                     {
                         auto_bill_outstanding = true,
