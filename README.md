@@ -136,3 +136,163 @@ Si deseas recibir Webhooks en un entorno en la nube, puedes configurar Azure App
   
 ---
 
+## 🔗 **Llamadas a la API de PayPal y Formato de Respuesta JSON**
+
+En este proyecto, las clases dentro de la carpeta **`Core/Services`** realizan llamadas a la API de PayPal para manejar productos, planes de suscripción y pagos. A continuación, se detallan las principales llamadas y ejemplos de respuestas JSON, incluyendo la ubicación exacta dentro del código.
+
+---
+
+### 📌 **1. Autenticación y Obtención del Access Token**
+📄 **Clase:** `PayPalService.cs`  
+👉 **Ubicación:** `PayPalService.cs` - **Inicio en línea 97**  
+🔗 **Endpoint:** `POST /v1/oauth2/token`
+
+#### 🔍 **Parámetros enviados**
+```json
+{
+  "grant_type": "client_credentials"
+}
+```
+
+#### 👅 **Ejemplo de respuesta**
+```json
+{
+  "access_token": "A21AAH8...",
+  "token_type": "Bearer",
+  "expires_in": 32400
+}
+```
+
+---
+
+### 📌 **2. Creación de Productos**
+📄 **Clase:** `PayPalProductService.cs`  
+👉 **Ubicación:** `PayPalProductService.cs` - **Línea 21**  
+🔗 **Endpoint:** `POST /v1/catalogs/products`
+
+#### 🔍 **Parámetros enviados**
+```json
+{
+  "name": "Membresía Premium",
+  "description": "Acceso ilimitado",
+  "type": "SERVICE"
+}
+```
+
+#### 👅 **Ejemplo de respuesta**
+```json
+{
+  "id": "PROD-XX12345678",
+  "name": "Membresía Premium",
+  "status": "ACTIVE"
+}
+```
+
+---
+
+### 📌 **3. Creación de Planes de Suscripción**
+📄 **Clase:** `PayPalProductService.cs`  
+👉 **Ubicación:** `PayPalProductService.cs` - **Línea 51**  
+🔗 **Endpoint:** `POST /v1/billing/plans`
+
+#### 🔍 **Parámetros enviados**
+```json
+{
+  "product_id": "PROD-XX12345678",
+  "name": "Plan Mensual",
+  "billing_cycles": [
+    {
+      "frequency": {
+        "interval_unit": "MONTH",
+        "interval_count": 1
+      },
+      "tenure_type": "REGULAR",
+      "sequence": 1,
+      "pricing_scheme": {
+        "fixed_price": {
+          "value": "10.00",
+          "currency_code": "USD"
+        }
+      }
+    }
+  ],
+  "payment_preferences": {
+    "auto_bill_outstanding": true,
+    "setup_fee": {
+      "value": "0",
+      "currency_code": "USD"
+    }
+  }
+}
+```
+
+#### 👅 **Ejemplo de respuesta**
+```json
+{
+  "id": "P-XX12345678",
+  "status": "ACTIVE",
+  "product_id": "PROD-XX12345678",
+  "billing_cycles": [...],
+  "payment_preferences": {...}
+}
+```
+
+---
+
+### 📌 **4. Creación de Suscripciones**
+📄 **Clase:** `PayPalSubscriptionService.cs`  
+👉 **Ubicación:** `PayPalSubscriptionService.cs` - **Línea 20**  
+🔗 **Endpoint:** `POST /v1/billing/subscriptions`
+
+#### 🔍 **Parámetros enviados**
+```json
+{
+  "plan_id": "P-XX12345678",
+  "application_context": {
+    "return_url": "https://tuapp.azurewebsites.net/success",
+    "cancel_url": "https://tuapp.azurewebsites.net/cancel"
+  }
+}
+```
+
+#### 👅 **Ejemplo de respuesta**
+```json
+{
+  "id": "I-XX12345678",
+  "status": "APPROVAL_PENDING",
+  "links": [
+    {
+      "href": "https://www.paypal.com/checkoutnow?token=I-XX12345678",
+      "rel": "approve",
+      "method": "GET"
+    }
+  ]
+}
+```
+
+---
+
+### 📌 **5. Manejo de Webhooks**
+📄 **Clase:** `PayPalWebhookService.cs`  
+👉 **Ubicación:** `PayPalWebhookService.cs` - **Línea 35**  
+🔗 **Endpoint:** `GET /v1/notifications/webhooks-events`
+
+#### 👅 **Ejemplo de respuesta**
+```json
+{
+  "id": "WH-XX12345678",
+  "event_type": "PAYMENT.SALE.COMPLETED",
+  "resource": {
+    "id": "PAYID-XX12345678",
+    "status": "COMPLETED",
+    "amount": {
+      "total": "10.00",
+      "currency": "USD"
+    }
+  }
+}
+```
+
+---
+
+
