@@ -51,16 +51,32 @@ cd PayPalApp
   4️⃣ Redirección a PayPal → El usuario es llevado a PayPal para autorizar el pago.
   
   5️⃣ Confirmación con Webhook → PayPal envía notificaciones cuando un pago se procesa correctamente.
+  
 ---
-### 📡 **Configuración del Webhook con ngrok**
-1. Para probar Webhooks en localhost, es necesario ngrok:
-2. Descargar e instalar ngrok.
-   Ejecutar este comando (ajustar el puerto según IIS Express):
-  ```
-   ngrok http 44358
-```
-3. Copiar la URL pública (https://random-id.ngrok.io/WebhookHandler.aspx).
-4. Registrar el Webhook en PayPal en PayPal Developer Console.
+### 📡 **Configuración del Webhook (ngrok y Azure)**  
+
+Para recibir eventos de PayPal en desarrollo y producción, puedes usar **ngrok** para pruebas locales o configurar el Webhook en **Azure**.
+
+#### 🛠 **Opción 1: Webhook con ngrok (baja latencia en desarrollo)**  
+Si deseas probar Webhooks en **localhost**, puedes utilizar **ngrok** para exponer tu servidor local a Internet:
+
+1. **Descargar e instalar ngrok** desde [ngrok.com](https://ngrok.com/download).  
+2. **Ejecutar el siguiente comando** (ajusta el puerto según IIS Express):  
+
+   ```sh
+   ngrok http 44300
+3. **Copia la URL pública generada** (https://xxxxx.ngrok.io) y configúrala en tu cuenta de PayPal como la URL del Webhook.
+
+#### ☁ Opción 2: Webhook en Azure (para producción)
+Si deseas recibir Webhooks en un entorno en la nube, puedes configurar Azure App Service:
+
+1. Publicar tu aplicación en Azure siguiendo los pasos de despliegue.
+
+2. Obtener la URL de tu aplicación desde el portal de Azure (por ejemplo, https://tuapp.azurewebsites.net).
+
+3. Configurar el Webhook en PayPal con la URL de producción:
+   ```
+   https://tuapp.azurewebsites.net/WebhookHandler.aspx
 
 ---
 
@@ -82,6 +98,41 @@ cd PayPalApp
  ┃ ┃ ┗ PayPalWebhookService.cs
  ┃ ┗ PayPalSubscriptionService.cs
 ```
+### 🌐 Páginas Web Forms
+- **FormLogin.aspx.cs**
 
+  Permite al usuario autenticarse con su Client ID y Secret, obteniendo un Access Token de PayPal.
+
+- **FormProducts.aspx.cs**
+
+  Permite crear productos y planes de suscripción en PayPal usando el Access Token.
+
+- **FormPayment.aspx.cs**
+
+  Genera enlaces de pago para que los usuarios puedan suscribirse a un plan.
+
+- **FormWebhookID.aspx.cs**
+
+  Permite ingresar y almacenar un Webhook ID de PayPal en sesión.
+
+- **WebhookHandler.aspx.cs**
+  Escucha y procesa eventos enviados por los Webhooks de PayPal, mostrando el estado de pagos y suscripciones.
+
+### 🛠 Servicios Core (Lógica de Negocio)
+- **PayPalService.cs**
+
+  Servicio base para la autenticación y creación de productos y planes en PayPal.
+
+- **PayPalWebhookService.cs**
+  
+  Maneja la recepción y verificación de eventos de Webhook desde PayPal.
+
+- **PayPalProductService.cs**
+
+  Permite la creación y administración de productos en la plataforma de PayPal.
+
+- **PayPalSubscriptionService.cs**
+  Gestiona la creación de suscripciones y genera enlaces de pago.
+  
 ---
 
