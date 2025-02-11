@@ -143,7 +143,7 @@ En este proyecto, las clases dentro de la carpeta **`Core/Services`** realizan l
 ---
 
 ### 📌 **1. Autenticación y Obtención del Access Token**
-📍 [**Link a la clase**](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationLibrary/Services/PayPalService.cs)
+📍 **[Link a la clase](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationLibrary/Services/PayPalService.cs)**
 
 📄 **Clase:** `PayPalService.cs`  
 👉 **Ubicación:** `PayPalService.cs` - **Inicio en línea 97**  
@@ -168,7 +168,7 @@ En este proyecto, las clases dentro de la carpeta **`Core/Services`** realizan l
 ---
 
 ### 📌 **2. Creación de Productos**
-📍 [**Link a la clase**](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalProductService.cs)
+📍 **[Link a la clase](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalProductService.cs)**
 
 📄 **Clase:** `PayPalProductService.cs`  
 👉 **Ubicación:** `PayPalProductService.cs` - **Línea 21**  
@@ -195,7 +195,7 @@ En este proyecto, las clases dentro de la carpeta **`Core/Services`** realizan l
 ---
 
 ### 📌 **3. Creación de Planes de Suscripción**
-📍 [**Link a la clase**](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalProductService.cs)
+📍 **[Link a la clase](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalProductService.cs)**
 
 📄 **Clase:** `PayPalProductService.cs`  
 👉 **Ubicación:** `PayPalProductService.cs` - **Línea 51**  
@@ -246,7 +246,7 @@ En este proyecto, las clases dentro de la carpeta **`Core/Services`** realizan l
 ---
 
 ### 📌 **4. Creación de Suscripciones**
-📍 [**Link a la clase**]([https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalProductService.cs](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/PayPalSubscriptionService.cs))
+📍 **[Link a la clase]([https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalProductService.cs](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/PayPalSubscriptionService.cs))**
 
 📄 **Clase:** `PayPalSubscriptionService.cs`  
 👉 **Ubicación:** `PayPalSubscriptionService.cs` - **Línea 20**  
@@ -281,7 +281,7 @@ En este proyecto, las clases dentro de la carpeta **`Core/Services`** realizan l
 ---
 
 ### 📌 **5. Manejo de Webhooks**
-📍 [**Link a la clase**](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalWebhookService.cs)
+📍 **[Link a la clase](https://github.com/Danielammmm/PayPalApp/blob/c5d7d7a613aaab2144b1e51a423abe40ed8d3ef2/PayPalIntegrationApp.Core/Services/PayPalWebhookService.cs)**
 
 📄 **Clase:** `PayPalWebhookService.cs`  
 👉 **Ubicación:** `PayPalWebhookService.cs` - **Línea 35**  
